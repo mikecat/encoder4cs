@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>データ欠損を突破してクラウドシェルにデータを持ち込むやつ</title>
+<link href="encoder4cs.css" rel="stylesheet">
+<script src="encoder4cs.js"></script>
+</head>
+<body>
+
+<div class="github-ribbon">
+<!-- https://github.blog/2008-12-19-github-ribbons/ -->
+<a href="https://github.com/mikecat/encoder4cs"><img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_gray_6d6d6d.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1"></a>
+</div>
+
+<h1>データ欠損を突破してクラウドシェルにデータを持ち込むやつ</h1>
+
+<h2>背景</h2>
+<p>
+<a href="https://www.sakura.ad.jp/services/cloudshell/">さくらのクラウドシェル</a>では、Webブラウザ上でLinuxのシェルを用いてプログラムの実行を試すことができます。<br>
+しかし、このサービスには (2024年3月現在) 長いデータを貼り付けしようとするとランダムに一部のデータが欠損してしまう問題があり、大きなソースコードやデータを持ち込むのが難しいという欠点があります。<br>
+(「長い」といっても、数KB程度のデータでも欠損が発生することがあります)<br>
+そこで、このデータの欠損に打ち勝ち、長いデータを効率よく貼り付けるため、このツールを開発しました。<br>
+このツールは、データに冗長性を付加し、それを欠損しにくい短いデコーダで復元することで、長いデータをクラウドシェルに持ち込みやすくします。
+</p>
+
+<h2>準備</h2>
+<p>
+まず、デコーダをクラウドシェル内に配置します。<br>
+最初に、以下のコマンドをクラウドシェルにコピペし、Enterキーを押して実行してください。<br>
+クラウドシェルへの貼り付けは、Ctrl+V<strong>ではなく</strong>、右クリックから行ってください。
+</p>
+<p>
+<input class="copyable-area" type="text" value="base64 -d | gunzip > encoder4cs-decode.pl" size="50" readonly>
+</p>
+
+<p>
+続いて、以下のデータをクラウドシェルにコピペし、Ctrl+D (入力の終わりを表す) を押してください。
+</p>
+<p>
+<textarea class="copyable-area" rows="7" cols="85" readonly>H4sIAN49BGYCAFVRW0/CMBR+91fM5WRpucMMJutKROGBGCARfIERsrlWG0c3t5qgZP52Wy4KL23zXXK+8/
+WzYNZ4NB563n1YsO4NMcBDuslyVhSet0hEREDSeptARG2bIIhroDAVkiehYiMpFMIkFsw+QyweioTFtuCg
+ruliPX0kkZCbNGZoNh9Mn+eY8DRHhOCduUHQFgHhd/VRreIdZEsQKzNNcATSb2koob62jiY9g8WMC8liBA
+l2HE39NIM+amDUqOCgvQzyQK4qwXdT27Y0zbWujeuua5wtn8JWe7b+XeY4CZOv6g1BB1N629VyqVmzKHRI
+WZb76ZSC+IsExzI0C8wEPI/vnuJzepCT06vqrgQHbrEPbTFdxaEKLVFYUZ6+M2n/k8AaFDgpN18I0hoUmE
+Jc7x2r1Xu/6A7X0f6nEDB80fxZ68Whdcc5vGbzp2F/vB5OBiTLhVSQkiQslGWU9JIvr34BTZyHOxICAAA=
+</textarea>
+</p>
+
+<p>
+コピペ時、欠損が発生した場合 (貼り付けできた行が少ない、一部の行の長さが違うなど) は、もう一度コマンドのコピペからやり直してください。
+</p>
+
+<h2>持ち込むデータの入力</h2>
+<p>
+クラウドシェルに持ち込む用にエンコードするデータを入力してください。<br>
+以下の入力欄にテキスト (UTF-8、改行コードLF) を入力するか、ファイルをドロップします。<br>
+※ファイルを選択またはドロップすると、入力されたテキストは消えます
+</p>
+<p>
+<button id="input_select_file" type="button">ファイルを選択</button><br>
+<textarea id="input_textarea" rows="10" cols="100"></textarea>
+</p>
+<p>
+クラウドシェルに保存するファイル名：<input id="input_save_file_name" type="text" value="data.txt" size="20">
+<label for="use_input_file_name_for_save">
+<input type="checkbox" id="use_input_file_name_for_save" checked>
+選択またはドロップしたファイルの名前を使用する
+</label>
+</p>
+
+<details><summary>オプション</summary>
+<p>
+<label for="use_tail_in_command">
+<input type="checkbox" id="use_tail_in_command" checked>
+<code>tail</code> を使用する (デコード失敗時、入力データをコマンドとして実行しようとするのを防ぐ)
+</label>
+</p>
+<p>
+<label for="split_encoded_data">
+<input type="checkbox" id="split_encoded_data">
+エンコードしたデータを <input id="lines_per_splitted_block" type="number" min="1" value="800" size="7">
+行ごとに分割する (長いデータをより欠落しにくくする)
+</label>
+</p>
+</details>
+
+<h2>エンコード結果・クラウドシェルへの転送</h2>
+<p>
+まず、以下のコマンドをクラウドシェルにコピペし、Enterキーを押して実行してください。<br>
+実行は、準備でデコーダー <code>decode.pl</code> を保存したディレクトリで行ってください。
+</p>
+<p>
+<input class="copyable-area" id="decode_command" type="text" value="tail -n 99999999 | perl encoder4cs-decode.pl > data.txt" size="85" readonly>
+</p>
+
+<p>
+続いて、以下のデータをクラウドシェルにコピペしてください。<br>
+データが複数ある場合は、上から順に1回ずつコピペしてください。<br>
+データ欠損により改行で終わらなかった場合は、Enterキーを押して改行を補ってください。<br>
+(改行で終わった場合は、(余計な) 改行をいれないでください)<br>
+全てのデータをコピペした後、コマンドの実行が自動で終了しない場合は、Ctrl+D を押してください。
+</p>
+<div id="encode_result_area">
+</div>
+
+<p>
+data is broken と表示されるなど、デコードに失敗した場合は、もう一度コマンドとデータのコピペを試してみてください。<br>
+もう一度か数度試すと、データ欠損の位置が変わり、デコードに成功する可能性があります。<br>
+失敗が続くようであれば、オプションからデータの分割を有効にする・分割のブロックサイズ (行数) を下げる、などを試してみてください。
+</p>
+
+</body>
+</html>

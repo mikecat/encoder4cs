@@ -1,0 +1,26 @@
+.github-ribbon {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
+	padding: 0;
+	z-index: 1;
+}
+
+.copyable-area {
+	font-family: monospace;
+}
+
+.copy-indicator {
+	display: none;
+	margin-left: 0.7em;
+}
+
+.copy-indicator.active {
+	display: unset;
+}
+
+.copy-indicator.latest {
+	display: unset;
+	opacity: 0.3;
+}
