@@ -28,7 +28,8 @@
 <p>
 まず、デコーダをクラウドシェル内に配置します。<br>
 最初に、以下のコマンドをクラウドシェルにコピペし、Enterキーを押して実行してください。<br>
-クラウドシェルへの貼り付けは、Ctrl+V<strong>ではなく</strong>、右クリックから行ってください。
+クラウドシェルへの貼り付けは、Ctrl+V<strong>ではなく</strong>、右クリックから行ってください。<br>
+※カレントディレクトリにファイル <code>encoder4cs-decode.pl</code> がある場合、上書きされます
 </p>
 <p>
 <input class="copyable-area" type="text" value="base64 -d | gunzip > encoder4cs-decode.pl" size="50" readonly>
@@ -80,7 +81,7 @@ X00piD8/cEzCsMCsu3PvnZN3Tg/j5NRVOivBgTvs00hsUEmkI0coJy6yDybdfxJYnQIn5eYbQVYFhSkk
 <label for="split_encoded_data">
 <input type="checkbox" id="split_encoded_data">
 エンコードしたデータを <input id="lines_per_splitted_block" type="number" min="1" value="2000" size="7">
-行ごとに分割する (長いデータをより欠落しにくくする)
+行ごとに分割する (長いデータをより欠損しにくくする)
 </label>
 </p>
 </details>
@@ -98,7 +99,7 @@ X00piD8/cEzCsMCsu3PvnZN3Tg/j5NRVOivBgTvs00hsUEmkI0coJy6yDybdfxJYnQIn5eYbQVYFhSkk
 続いて、以下のデータをクラウドシェルにコピペしてください。<br>
 データが複数ある場合は、上から順に1回ずつコピペしてください。<br>
 データ欠損により改行で終わらなかった場合は、Enterキーを押して改行を補ってください。<br>
-(改行で終わった場合は、(余計な) 改行をいれないでください)<br>
+(改行で終わった場合は、(余計な) 改行を入れないでください)<br>
 全てのデータをコピペした後、コマンドの実行が自動で終了しない場合は、Ctrl+D を押してください。
 </p>
 <div id="encode_result_area">
