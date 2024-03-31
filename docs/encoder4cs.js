@@ -139,8 +139,8 @@ window.addEventListener("DOMContentLoaded", () => {
 			}
 		}
 	};
-	const blockLength = 57; // ブロック1個の入力バイト数
-	const blockSetNum = 3; // ブロックを何行ずつ繰り返すか
+	const blockLength = 60; // ブロック1個の入力バイト数
+	const blockSetNum = 4; // ブロックを何行ずつ繰り返すか
 	const redundantMult = 2; // ブロックのセットを何回繰り返すか
 	const setLength = blockLength * blockSetNum;
 	const blockLengthOut = Math.floor((blockLength * 4 + 2) / 3);
@@ -159,7 +159,7 @@ window.addEventListener("DOMContentLoaded", () => {
 						const b = i % blockSetNum;
 						const c = String.fromCharCode(0x21 + i);
 						const e = encoded.substring(blockLengthOut * b, blockLengthOut * (b + 1));
-						latestEncodedLines.push(c + e + c);
+						latestEncodedLines.push(c + c +  e + c + c);
 					}
 				}
 				showEncodeResult();
